@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+<head>
+    <title>Node Authentication</title>
+    
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+    <style>
+        body         { padding-top:40px; word-wrap:break-word; }
+        
+        
+        #menuBtns {
+      display: inline-block;
+      float: right;
+      margin-right: 10px;
+    }
+    a {
+      text-decoration: none;
+      color: grey;
+    }
+    a:hover {
+      text-decoration: none;
+    }
+    .form-group {
+      width: 60%;
+      margin: auto;
+    }
+    </style>
+</head>
+<body>
+     <a href="/" id="menuBtns" class="btn btn-default"><span class="fa"></span>Home</a>
+    <a href="/polls" id="menuBtns" class="btn btn-default"><span class="fa"></span>Polls</a>
+    <a href="/profile" id="menuBtns" class="btn btn-default"><span class="fa fa-user"></span> Profile</a>
+<div class="container">
+
+    <div class="page-header text-center">
+        <h1><span class="fa"></span> Profile Page</h1>
+        <br>
+        <a href="/logout" class="btn btn-default btn-sm">Logout</a>
+        <a href="/myPolls" class="btn btn-default btn-sm">My Polls</a>
+        <a href="/makePoll" class="btn btn-default btn-sm">Make poll</a>
+    </div>
+
+    <div class="row">
+
+        <!-- LOCAL INFORMATION -->
+        <div class="col-sm-6">
+            <div class="well">
+                <h3><span class="fa fa-user"></span> Local</h3>
+
+                <% if (user.local.email) { %>
+                
+                    <p>
+                        <strong>id</strong>: <%= user._id %><br>
+                        <strong>email</strong>: <%= user.local.email %><br>
+                        <!---<strong>password</strong>: %= user.local.password %>-->
+                    </p>
+                   
+                    <a href="/unlink/local" class="btn btn-default">Unlink</a>
+                <% } else { %>
+                    <a href="/connect/local" class="btn btn-default">Connect Local</a>
+                <% } %>
+
+            </div>
+        </div>
+
+    </div>
+    <div class="row">
+
+        <!-- TWITTER INFORMATION -->
+        <div class="col-sm-6">
+            <div class="well">
+                <h3 class="text-info"><span class="fa fa-twitter"></span> Twitter</h3>
+
+                <% if (user.twitter.token) { %>
+                    <p>
+                        <strong>id</strong>: <%= user.twitter.id %><br>
+                        <strong>token</strong>: <%= user.twitter.token %><br>
+                        <strong>display name</strong>: <%= user.twitter.displayName %><br>
+                        <strong>username</strong>: <%= user.twitter.username %>
+                    </p>
+
+                    <a href="/unlink/twitter" class="btn btn-info">Unlink</a>
+                <% } else { %>
+                    <a href="/connect/twitter" class="btn btn-info">Connect Twitter</a>
+                <% } %>
+
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>
