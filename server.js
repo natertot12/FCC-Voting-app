@@ -3,17 +3,8 @@
 
 //    TO DO:
 
-//make /polls only accessable to members
-
-
-//make the user be able to see their own polls on profile page
-//make sure users cant vote twice on same poll
-
 //add ul li home polls profile thing to /polls page
 //add css on other pages
-
-//re npm init
-//push to git
 
 //deploy to heroku
 
@@ -24,7 +15,6 @@
 
 
 //all credit for twitter and login/signup integration ---> https://github.com/scotch-io/easy-node-authentication/tree/twitter
-
 // set up ======================================================================
 var app = require("express")();
 var port     = process.env.PORT || 8080;
@@ -91,43 +81,51 @@ app.use(flash()); // use connect-flash for flash messages stored in session
 
 mongo.connect(mongoUrl, function(err, db) {
    if(err) throw err;
-   /*
-    db.createCollection("polls", {
-        capped: true,
-        size: 5242880,
-        max: 5000
-    });
-    */
-
     
   app.get("/myPolls", function(req, res) {
-      var ObjectID=require('mongodb').ObjectID;
-        
       var searches = db.collection('polls').find({createdBy: currentUser._id.toString()}).sort({total:-1});
-      searches.forEach(function(doc) {
-        res.write("<p><a href='/polls/" + doc._id + "'>" + JSON.stringify(doc.Description) + " Total votes: " + JSON.stringify(doc.total) + "</a></p>");
-      }, function(err) {
-        if(err) throw err;
-        res.end();
-      });
+    fs.readFile((path.join(__dirname + '/views/poll.html')), function(err, data) {
+        if (err) throw err;
+        res.write(data);
+        res.write('<div class="page-header text-center"><h1><span class="fa" id="title">My Polls</span></h1></div>');
+        searches.forEach(function(doc) {
+            res.write("<p id='poll'><a href='/polls/" + doc._id + "'>" + JSON.stringify(doc.Description) + " Total votes: " + JSON.stringify(doc.total) + "</a></p>");
+        }, function(err) {
+                if(err) throw err;
+                res.end();
+        });
+    });
   });
   
   
   app.get("/makePoll", isLoggedIn, function(req, res) {
-      res.sendFile((path.join(__dirname + '/views/form.html')));
+      res.render("form.ejs");
   })
   
   
   app.get('/polls', isLoggedIn, function(req,res) {//finds most popular polls and sends
     var searches = db.collection('polls').find().limit(10).sort({total:-1});
+    /*
     searches.forEach(function(doc) {
             res.write("<p><a href='/polls/" + doc._id + "'>" + JSON.stringify(doc.Description) + " Total votes: " + JSON.stringify(doc.total) + "</a></p>");
         }, function(err) {
             if(err) throw err;
             res.end();
         });
+    */
+    fs.readFile((path.join(__dirname + '/views/poll.html')), function(err, data) {
+        if (err) throw err;
+        res.write(data);
+        res.write('<div class="page-header text-center"><h1><span class="fa" id="title">Top 10 Polls</span></h1></div>');
+        searches.forEach(function(doc) {
+            res.write("<p id='poll'><a href='/polls/" + doc._id + "'>" + JSON.stringify(doc.Description) + " Total votes: " + JSON.stringify(doc.total) + "</a></p>");
+        }, function(err) {
+                if(err) throw err;
+                res.end();
+        });
+    });
   });
-  app.get('/polls/:specificPoll', isLoggedIn, function(req, res) {//sends chart data
+  app.get('/polls/:specificPoll', isLoggedIn, function(req, res) {
     var url = req.params.specificPoll;
     //console.log(url);
     currentPoll = url;
@@ -139,7 +137,8 @@ mongo.connect(mongoUrl, function(err, db) {
         dataTest = poll.Data;
         currentDes = poll.Description;
     });
-    res.sendFile((path.join(__dirname + '/views/pie.html')));
+    //res.sendFile((path.join(__dirname + '/views/pie.html')));
+    res.render("pie.ejs");
   });
   app.post("/option1", function(req, res) {
     console.log("Voted for Option 1");
@@ -218,27 +217,14 @@ mongo.connect(mongoUrl, function(err, db) {
       });
   }
   
-  
-  /*
-  db.polls.findOne({_id: ObjectID(c})
-*/
-  
-  
-  
-  
   function addVote(res, thing) {
       var ObjectID=require('mongodb').ObjectID;
-      
-    db.collection('polls').findOne({// if this has success then do the code below
+    db.collection('polls').findOne({
         _id: ObjectID(currentPoll),
-        //votedBy: {$nin: currentUser._id },
-        votedBy: {$not: currentUser._id}
-    //});
+        votedBy: {$nin: [currentUser._id] }
     },function(err, poll) {
         if(err) throw err;
         if(poll != null) {
-            console.log(poll.votedBy);
-    ///if(nin) {
       switch(thing) {
         case "option-1":
             db.collection('polls').update({_id: ObjectID(currentPoll)}, { $inc: { total: 1, "Data.0.value": 1} });
@@ -256,37 +242,13 @@ mongo.connect(mongoUrl, function(err, db) {
             db.collection('polls').update({_id: ObjectID(currentPoll)}, { $inc: { total: 1, "Data.4.value": 1} });
             break;
       }
-      
       db.collection('polls').update({
           _id: ObjectID(currentPoll)
       }, { 
           $push: { votedBy: currentUser._id } 
       });
-      
-      
-      
         }
     });
-    
-    
-    
-    
-    /*
-    
-    
-    db.collection('polls').update({
-          _id: ObjectID(currentPoll)
-      }, { 
-          $push: { votedBy: currentUser._id } 
-      }, function(err, result){
-       if(err){
-          console.log(err);
-       }
-       console.log(result);
-      });
-    
-    */
-    
     res.redirect("/polls/" + currentPoll);
   }
   
@@ -318,8 +280,6 @@ mongo.connect(mongoUrl, function(err, db) {
             user : req.user
         });
         currentUser = req.user;
-        
-        //console.log(currentUser._id);
     });
     // LOGOUT ==============================
     app.get('/logout', function(req, res) {
@@ -414,35 +374,6 @@ mongo.connect(mongoUrl, function(err, db) {
 function isLoggedIn(req, res, next) {
     if (req.isAuthenticated())
         return next();
-
-    res.redirect('/');
+        res.redirect('/');
 }
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    server.listen(port);
+server.listen(port);
