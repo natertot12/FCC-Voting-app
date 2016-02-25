@@ -3,9 +3,6 @@
 
 //    TO DO:
 
-//add ul li home polls profile thing to /polls page
-//add css on other pages
-
 //deploy to heroku
 
 //optional add tweet button
@@ -134,11 +131,13 @@ mongo.connect(mongoUrl, function(err, db) {
         //console.log(poll.Description);
         //console.log(poll.createdBy);
         if(err) throw err;
-        dataTest = poll.Data;
-        currentDes = poll.Description;
+        if(poll != null) {
+            dataTest = poll.Data;
+            currentDes = poll.Description;
+        }
     });
     //res.sendFile((path.join(__dirname + '/views/pie.html')));
-    res.render("pie.ejs");
+    res.render("pie.ejs", {url: url.toString()});
   });
   app.post("/option1", function(req, res) {
     console.log("Voted for Option 1");
@@ -221,7 +220,7 @@ mongo.connect(mongoUrl, function(err, db) {
       var ObjectID=require('mongodb').ObjectID;
     db.collection('polls').findOne({
         _id: ObjectID(currentPoll),
-        votedBy: {$nin: [currentUser._id] }
+        votedBy: {$nin:  [currentUser._id]  }
     },function(err, poll) {
         if(err) throw err;
         if(poll != null) {

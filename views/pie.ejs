@@ -7,71 +7,58 @@
     <script src="https://cdn.socket.io/socket.io-1.4.5.js"></script>
     <script>
       $(document).ready(function() {
-
-
-          /*var chartTest = [{value: 10, label: 'Mac OS X', color: '#4169E1'},
-            { value: 5, label: 'Windows', color: '#C0C0C0'},
-            { value: 8, label: 'Ubuntu', color: '#FFA500'},
-            { value: 20, label: 'Arch Linux', color: '#FF4500'},
-            { value: 7, label: 'Other Linux', color: '#EE82EE'}];
-          */
-          var chartTest;
-          var socket = io.connect('http://timestamp-natertot12.c9users.io:8080/');
-        socket.on('chart', function (data) {
-          chartTest = data;
-          socket.emit('recieved', data);
-        });
-        socket.on('description', function (data) {
-          $("#description").text(data);
-          socket.emit('recieved', data);
-        });
-
-        setTimeout(function() {
-
-        for(var a = 0; a < chartTest.length; a++) {
-          $("#votes").append("<form id='jsAdded' class='form-group' action='/option" + (a + 1).toString() + "' method='post' id='option-" + (a + 1).toString() + "' enctype='multipart/form-data'><input class='btn btn-secondary' type='submit' value='" + chartTest[a].label + "'/></form>");
-        }
-        function hideAll() {
-          for(var b = 0; b < chartTest.length; b++) {
-            $("#option-" + (b + 1).toString()).hide();
-          }
-        }
-
-
-        $('#option-1').click(function(){
-          hideAll();
-        });
-        $('#option-2').click(function(){
-          hideAll();
-        });
-        $('#option-3').click(function(){
-          hideAll();
-        });
-        $('#option-4').click(function(){
-          hideAll();
-        });
-        $('#option-5').click(function(){
-          hideAll();
-        });
-
-
-          var options = { showTooltips : true };
-
-          var total = 0;
-          for (var i = 0; i < chartTest.length; i++) {
-               total = total + chartTest[i].value;
-          }
-
-          var chartCtx = $("#canvas").get(0).getContext("2d");
-          var chart = new Chart(chartCtx).Doughnut(chartTest, options);
-
-          var textCtx = $("#text").get(0).getContext("2d");
-          textCtx.textAlign = "center";
-          textCtx.textBaseline = "middle";
-          textCtx.font = "20px sans-serif";
-          textCtx.fillText("Total votes " + total.toString(), 150, 150);
-        }, 1000);  
-        });
+  var chartTest;
+  var des;
+  var socket = io.connect('http://timestamp-natertot12.c9users.io:8080/');
+  socket.on('chart', function(data) {
+    chartTest = data;
+    socket.emit('recieved', data);
+  });
+  socket.on('description', function(data) {
+    $("#description").text(data);
+    des = data;
+    socket.emit('recieved', data);
+  });
+  setTimeout(function() {
+    for (var a = 0; a < chartTest.length; a++) {
+      $("#votes").append("<form id='jsAdded' class='form-group' action='/option" + (a + 1).toString() + "' method='post' id='option-" + (a + 1).toString() + "' enctype='multipart/form-data'><input class='btn btn-secondary' type='submit' value='" + chartTest[a].label + "'/></form>");
+    }
+    function hideAll() {
+      for (var b = 0; b < chartTest.length; b++) {
+        $("#option-" + (b + 1).toString()).hide();
+      }
+    }
+    $('#option-1').click(function() {
+      hideAll();
+    });
+    $('#option-2').click(function() {
+      hideAll();
+    });
+    $('#option-3').click(function() {
+      hideAll();
+    });
+    $('#option-4').click(function() {
+      hideAll();
+    });
+    $('#option-5').click(function() {
+      hideAll();
+    });
+    var options = {
+      showTooltips: true
+    };
+    var total = 0;
+    for (var i = 0; i < chartTest.length; i++) {
+      total = total + chartTest[i].value;
+    }
+    var chartCtx = $("#canvas").get(0).getContext("2d");
+    var chart = new Chart(chartCtx).Doughnut(chartTest, options);
+    var textCtx = $("#text").get(0).getContext("2d");
+    textCtx.textAlign = "center";
+    textCtx.textBaseline = "middle";
+    textCtx.font = "20px sans-serif";
+    textCtx.fillText("Total votes " + total.toString(), 150, 150);
+  }, 1000);
+});
     </script>
     <style>
       body { 
@@ -102,12 +89,19 @@
     </style>
   </head>
   <body>
+    <script>
+      $(document).ready($("#tweet").attr("data-url", "http://timestamp-natertot12.c9users.io:8080/polls/" + <%=url%>));
+    </script>
     <a href="/" id="menuBtns" class="btn btn-default"><span class="fa"></span>Home</a>
     <a href="/polls" id="menuBtns" class="btn btn-default"><span class="fa"></span>Polls</a>
     <a href="/profile" id="menuBtns" class="btn btn-default"><span class="fa fa-user"></span> Profile</a>
     <br>
-    <div class="page-header text-center">
+    <div id="head" class="page-header text-center">
       <h1 id="description"><span class="fa"></span></h1>
+      <br>
+      <!--<a id="tweet" class="twitter-share-button" href="https://twitter.com/intent/tweet?text=Check%20out%20this%20awesome%20poll!" data-size="large">Tweet</a>-->
+      <a id="tweet" href="https://twitter.com/share" class="twitter-share-button" data-text="Check out this poll" data-size="large">Tweet</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+'://platform.twitter.com/widgets.js';fjs.parentNode.insertBefore(js,fjs);}}(document, 'script', 'twitter-wjs');</script>
     </div>
     <br>
     <div id="votes">
