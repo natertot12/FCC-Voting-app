@@ -90,7 +90,9 @@
   </head>
   <body>
     <script>
-      $(document).ready($("#tweet").attr("data-url", "http://timestamp-natertot12.c9users.io:8080/polls/" + <%=url%>));
+      $(document).ready(function() {
+        $("#tweet").attr("data-url", "http://timestamp-natertot12.c9users.io:8080/polls/" + <%=url%>);
+      });
     </script>
     <a href="/" id="menuBtns" class="btn btn-default"><span class="fa"></span>Home</a>
     <a href="/polls" id="menuBtns" class="btn btn-default"><span class="fa"></span>Polls</a>

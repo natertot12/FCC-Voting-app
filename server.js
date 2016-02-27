@@ -1,17 +1,7 @@
 // server.js
 
-
-//    TO DO:
-
-//deploy to heroku
-
-//optional add tweet button
-
-
-
-
-
 //all credit for twitter and login/signup integration ---> https://github.com/scotch-io/easy-node-authentication/tree/twitter
+
 // set up ======================================================================
 var app = require("express")();
 var port     = process.env.PORT || 8080;
@@ -73,6 +63,7 @@ app.use(flash()); // use connect-flash for flash messages stored in session
   var currentPoll = "";
   var currentDes = "";
   var currentUser = "";
+  var voteNum;
   
 
 
@@ -86,7 +77,10 @@ mongo.connect(mongoUrl, function(err, db) {
         res.write(data);
         res.write('<div class="page-header text-center"><h1><span class="fa" id="title">My Polls</span></h1></div>');
         searches.forEach(function(doc) {
-            res.write("<p id='poll'><a href='/polls/" + doc._id + "'>" + JSON.stringify(doc.Description) + " Total votes: " + JSON.stringify(doc.total) + "</a></p>");
+            //res.write('<div id="test" class="container text-center"><form action="delete' + doc._id + '" method="post"><fieldset class="form-group"><p id="poll"><a href="/polls/' + doc._id + '">' + JSON.stringify(doc.Description) + ' Total votes: ' + JSON.stringify(doc.total) + '</a></p><input id="submit" class="btn btn-danger" type="submit" value="Delete Poll"/></fieldset></form></div>');
+            
+            res.write('<div id="test" class="container text-center"><form action="delete' + doc._id + '" method="post"><fieldset class="form-group"><p id="poll"><a href="/polls/' + doc._id + '">' + JSON.stringify(doc.Description) + ' Total votes: ' + JSON.stringify(doc.total) + '</a></p><input id="submit" class="btn btn-danger" type="submit" value="Delete Poll"/></fieldset></form><form action="/editpoll' + doc._id + '" method="get"><fieldset class="form-group"><input id="editpoll" class="btn btn-secondary" type="submit" value="Edit Poll"/></fieldset></form></div>');
+            
         }, function(err) {
                 if(err) throw err;
                 res.end();
@@ -94,10 +88,98 @@ mongo.connect(mongoUrl, function(err, db) {
     });
   });
   
+  app.get("/editpoll:id", isLoggedIn, function(req, res) {
+      var labels = [];
+      var descript = "";
+      var url = req.params.id;
+      var amount = 0;
+      
+      var ObjectID=require('mongodb').ObjectID;
+      db.collection('polls').findOne({_id: ObjectID(url)},function(err,poll){
+        if(err) throw err;
+        if(poll != null) {
+            descript = poll.Description;
+            
+            for(var a = 0; a < poll.Data.length; a++) {
+                labels.push(poll.Data[a].label);
+            }
+            amount = labels.length;
+            //console.log(labels);
+            //console.log(descript);
+            //console.log(amount);
+            res.render("editpoll.ejs", {
+                labels: labels,
+                descript: descript,
+                amount: amount,
+                id: url
+            });
+        } else {
+            res.render("editpoll.ejs", {
+                labels: labels,
+                descript: descript,
+                amount: amount,
+                id: url
+            });
+            console.log("ERROR loading page");
+        }
+    });
+  });
+  
+  
+  app.post("/editedpoll:id", isLoggedIn, function(req, res) {
+      var url = req.params.id;
+      var ObjectID=require('mongodb').ObjectID;
+      Object.size = function(obj) {var size = 0, key; for (key in obj) if(obj.hasOwnProperty(key)) size++; return size;};
+      
+      
+      
+      
+      var form = new formidable.IncomingForm();
+      function parseData(fields, files, item) {
+        var str = util.inspect(fields[item], {fields: fields, files: files});
+        return str.replace(/(\"|\')/g, "");
+      }
+      form.parse(req, function (err, fields, files) {
+        if(err) throw err;
+        var desc = parseData(fields, files, "description");
+        db.collection("polls").findOne({
+            _id: ObjectID(url)
+        }, function(err, poll) {
+            if(err) throw err;
+            if(poll != null) {
+                //console.log(poll.Data[1]);
+                //console.log(poll["Data." + 1 + ".value"]);
+                var total = 0;
+                var newData = [];
+                for(var a = 0; a < Object.size(fields) - 1; a++) {
+                    var currentVal = poll.Data[a];
+                    newData.push({
+                        value: currentVal.value,
+                        label: parseData(fields, files, "option-" + (a + 1)),
+                        color: currentVal.color
+                    });
+                    total += currentVal.value;
+                    //console.log(currentVal.value);
+                }
+                console.log(newData);
+                console.log(total);
+                dataTest = newData;
+                db.collection("polls").update({
+                    _id: ObjectID(url)
+                },{createdBy: currentUser._id.toString(), total: total, "Description": desc, "Data": newData}, function(err) {
+                    if(err) throw err;
+                });
+            }
+        });
+      });
+      res.redirect("/polls/" + url);
+  });
+  
+  
   
   app.get("/makePoll", isLoggedIn, function(req, res) {
       res.render("form.ejs");
-  })
+  });
   
   
   app.get('/polls', isLoggedIn, function(req,res) {//finds most popular polls and sends
@@ -115,7 +197,7 @@ mongo.connect(mongoUrl, function(err, db) {
         res.write(data);
         res.write('<div class="page-header text-center"><h1><span class="fa" id="title">Top 10 Polls</span></h1></div>');
         searches.forEach(function(doc) {
-            res.write("<p id='poll'><a href='/polls/" + doc._id + "'>" + JSON.stringify(doc.Description) + " Total votes: " + JSON.stringify(doc.total) + "</a></p>");
+            res.write("<div class='container center-block'><p id='poll'><a href='/polls/" + doc._id + "'>" + JSON.stringify(doc.Description) + " Total votes: " + JSON.stringify(doc.total) + "</a></p></div><br>");
         }, function(err) {
                 if(err) throw err;
                 res.end();
@@ -137,28 +219,29 @@ mongo.connect(mongoUrl, function(err, db) {
         }
     });
     //res.sendFile((path.join(__dirname + '/views/pie.html')));
-    res.render("pie.ejs", {url: url.toString()});
+    res.render("pie.ejs", {
+        url: url.toString()
+    });
   });
-  app.post("/option1", function(req, res) {
-    console.log("Voted for Option 1");
-    addVote(res, "option-1");
+  
+  app.post("/option:num", function(req, res) {
+     voteNum = req.params.num;
+     //voteNum.toString();
+     //console.log(voteNum);
+     //console.log("voted for " + url)
+     addVote(res, voteNum);
   });
-  app.post("/option2", function(req, res) {
-    console.log("Voted for Option 2");
-    addVote(res, "option-2");
+  
+  
+  app.post("/delete:id", function(req, res) {
+      function deletePoll(poll) {
+        var ObjectID=require('mongodb').ObjectID;
+        db.collection('polls').remove({_id: ObjectID(poll)});
+      }
+      deletePoll(req.params.id);
+      res.redirect("/myPolls");
   });
-  app.post("/option3", function(req, res) {
-    console.log("Voted for Option 3");
-    addVote(res, "option-3");
-  });
-  app.post("/option4", function(req, res) {
-    console.log("Voted for Option 4");
-    addVote(res, "option-4");
-  });
-  app.post("/option5", function(req, res) {
-    console.log("Voted for Option 5");
-    addVote(res, "option-5");
-  });
+  
   app.post("/makePoll", function(req, res) {
     processAllFieldsOfTheForm(req, res);
   });
@@ -168,7 +251,16 @@ mongo.connect(mongoUrl, function(err, db) {
       if(err) throw err;
     });
   }
-  //will have to add users polls
+  
+  function getRandomColor() {
+    var letters = '0123456789ABCDEF'.split('');
+    var color = '#';
+    for (var i = 0; i < 6; i++ ) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
+
   function processAllFieldsOfTheForm(req, res) {
       var form = new formidable.IncomingForm();
       function parseData(fields, files, item) {
@@ -177,46 +269,26 @@ mongo.connect(mongoUrl, function(err, db) {
       }
       form.parse(req, function (err, fields, files) {
         if(err) throw err;
-          //res.writeHead(200, {'content-type': 'text/plain'});
-          
-          var rawData = [
-            {
-              value: 0,
-              label: parseData(fields, files, "option-1"),
-              color: "#4169E1"
-            },
-            {
-              value: 0,
-              label: parseData(fields, files, "option-2"),
-              color: "#C0C0C0"
-            },
-            {
-              value: 0,
-              label: parseData(fields, files, "option-3"),
-              color: "#FFA500"
-            },
-            {
-              value: 0,
-              label: parseData(fields, files, "option-4"),
-              color: "#FF4500"
-            },
-            {
-              value: 0,
-              label: parseData(fields, files, "option-5"),
-              color: "#EE82EE"
-            }
-          ];
-          //condenses from data
+            Object.size = function(obj) {
+                var size = 0, key;
+                for (key in obj) if(obj.hasOwnProperty(key)) size++;
+                return size;
+            };
           var chartData = [];
-          for(var a = 0; a < rawData.length; a++) if(rawData[a].label != '' && rawData[a].label != "") chartData.push(rawData[a]);
-          
+          for(var b = 1; b < Object.size(fields); b++) {
+              chartData.push({
+                  value: 0,
+                  label: parseData(fields, files, "option-" + b),
+                  color: getRandomColor()
+              });
+          }
+         
           savePoll(parseData(fields, files, "description"), chartData);
-          //console.log(parseData(fields, files, "description"), chartData);
           res.redirect("/profile");
       });
   }
   
-  function addVote(res, thing) {
+  function addVote(res, voteNum) {
       var ObjectID=require('mongodb').ObjectID;
     db.collection('polls').findOne({
         _id: ObjectID(currentPoll),
@@ -224,23 +296,8 @@ mongo.connect(mongoUrl, function(err, db) {
     },function(err, poll) {
         if(err) throw err;
         if(poll != null) {
-      switch(thing) {
-        case "option-1":
-            db.collection('polls').update({_id: ObjectID(currentPoll)}, { $inc: { total: 1, "Data.0.value": 1} });
-            break;
-        case "option-2":
-            db.collection('polls').update({_id: ObjectID(currentPoll)}, { $inc: { total: 1, "Data.1.value": 1} });
-            break;
-        case "option-3":
-            db.collection('polls').update({_id: ObjectID(currentPoll)}, { $inc: { total: 1, "Data.2.value": 1} });
-            break;
-        case "option-4":
-            db.collection('polls').update({_id: ObjectID(currentPoll)}, { $inc: { total: 1, "Data.3.value": 1} });
-            break;
-        case "option-5":
-            db.collection('polls').update({_id: ObjectID(currentPoll)}, { $inc: { total: 1, "Data.4.value": 1} });
-            break;
-      }
+    db.collection('polls').update({_id: ObjectID(currentPoll)}, { $inc: { total: 1, ["Data."+ voteNum +".value"]: 1} });
+
       db.collection('polls').update({
           _id: ObjectID(currentPoll)
       }, { 

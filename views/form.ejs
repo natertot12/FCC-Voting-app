@@ -1,51 +1,27 @@
-<!--<html>
-   <body>
-      <li><a href="/">Home</a></li>
-      <li><a href="/polls">Polls</a></li>
-      <li><a href="/profile">Profile</a></li>
-      <br>
-      <form action="/makePoll" method="post" enctype="multipart/form-data">
-         <fieldset>
-            <br/>
-            <label for="option-1">Option 1:</label>
-            <input type="text" id="option-1" name="option-1" placeholder="Enter the first option here" required/>
-            <br/>
-            <label for="option-2">Option 2:</label>
-            <input type="text" id="option-2" name="option-2" placeholder="Enter the second option here" required/>
-            <br/>
-            <label for="option-3">Option 3:</label>
-            <input type="text" id="option-3" name="option-3" placeholder="Enter the third option here"/>
-            <br/>
-            <label for="option-4">Option 4:</label>
-            <input type="text" id="option-4" name="option-4" placeholder="Enter the fourth option here"/>
-            <br/>
-            <label for="option-5">Option 5:</label>
-            <input type="text" id="option-5" name="option-5" placeholder="Enter the fifth option here"/>
-            <br/>
-            <label for="description">Ask the question!</label>
-            <textarea id="description" name="description" placeholder="Ask the question here!" required></textarea>
-            <br/>
-            <input type="submit" value="Create Poll"/>
-         </fieldset>
-      </form>
-   </body>
-</html>-->
-
-
-
-
-
-
-
-
-
-
 <html>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
-  <style>
-  body         { padding-top:40px; word-wrap:break-word; }
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      var option = 2;
+      $("#addOption").click(function() {
+        option += 1;
+        $("#options").append('<fieldset class="form-group"><br><label for="option-' + option + '">Option: ' + option + '</label><input class="form-control" type="text" id="option-' + option + '" name="option-' + option + '" placeholder="Enter the option here"/></fieldset>');
+      });
+      $("#subOption").click(function() {
+        if(option != 2) {
+          $("#options fieldset").last().remove();
+          option -= 1;
+        }
+      });
+    });
+  </script>
+<style>
+    body { 
+      padding-top:40px; word-wrap:break-word; 
+    }
     a {
       display: inline-block;
       float: right;
@@ -62,66 +38,52 @@
       width: 60%;
       margin: auto;
     }
-  </style>
-   <body>
-     <a href="/" class="btn btn-default"><span class="fa"></span>Home</a>
-    <a href="/polls" class="btn btn-default"><span class="fa"></span>Polls</a>
-    <a href="/profile" class="btn btn-default"><span class="fa fa-user"></span> Profile</a>
-  
-     <div class="page-header text-center">
-       <h1><span class="fa">Make Poll</span></h1>
-     </div>
-     
-     <br>
-     <br>
-     <form class="container" action="/makePoll" method="post" enctype="multipart/form-data">
-       <div class="container">
-         <fieldset class="form-group">
-           <label for="description">Ask the question!</label>
-              <textarea class="form-control" id="description" name="description" placeholder="Ask the question here!" required></textarea>
-         </fieldset>
-       </div>
-       <br>
-       <div class="container">
-          <fieldset class="form-group">
-              <label for="option-1">Option 1:</label>
-              <input class="form-control" type="text" id="option-1" name="option-1" placeholder="Enter the first option here" required/>
-         </fieldset>
-       </div>
-       <br>
-       <div class="container">
-         <fieldset class="form-group">
-              <label for="option-2">Option 2:</label>
-              <input class="form-control" type="text" id="option-2" name="option-2" placeholder="Enter the second option here" required/>
-         </fieldset>
-       </div>
-       <br>
-       <div class="container">
-         <fieldset class="form-group">
-              <label for="option-3">Option 3:</label>
-              <input class="form-control" type="text" id="option-3" name="option-3" placeholder="Enter the third option here"/>
-         </fieldset>
-       </div>
-       <br>
-       <div class="container">
-         <fieldset class="form-group">
-              <label for="option-4">Option 4:</label>
-              <input class="form-control" type="text" id="option-4" name="option-4" placeholder="Enter the fourth option here"/>
-         </fieldset>
-       </div>
-       <br>
-       <div class="container">
-         <fieldset class="form-group">
-              <label for="option-5">Option 5:</label>
-              <input class="form-control" type="text" id="option-5" name="option-5" placeholder="Enter the fifth option here"/>
-         </fieldset>
-       </div>
-       <br>
-       <div class="container text-center">
-         <fieldset class="form-group">
-              <input id="submit" class="btn btn-secondary" type="submit" value="Create Poll"/>
-         </fieldset>
-       </div>
-      </form>
-  </body>
+    #addOption {
+      margin-right: 10px;
+    }
+</style>
+<body>
+  <a href="/" class="btn btn-default"><span class="fa"></span>Home</a>
+  <a href="/polls" class="btn btn-default"><span class="fa"></span>Polls</a>
+  <a href="/profile" class="btn btn-default"><span class="fa fa-user"></span> Profile</a>
+  <div class="page-header text-center">
+    <h1><span class="fa">Make Poll</span></h1>
+  </div>
+  <br>
+  <br>
+  <form class="container" action="/makePoll" method="post" enctype="multipart/form-data">
+    <div class="container">
+      <fieldset class="form-group">
+        <label for="description">Ask the question!</label>
+        <textarea class="form-control" id="description" name="description" placeholder="Ask the question here!" required></textarea>
+      </fieldset>
+    <br>
+    </div>
+    <div id="options" class="container">
+        <fieldset class="form-group">
+          <label for="option-1">Option 1:</label>
+          <input class="form-control" type="text" id="option-1" name="option-1" placeholder="Enter the option here" required/>
+        </fieldset>
+      <br>
+        <fieldset class="form-group">
+          <label for="option-2">Option 2:</label>
+          <input class="form-control" type="text" id="option-2" name="option-2" placeholder="Enter the option here" required/>
+        </fieldset>
+    </div>
+  <br>
+    <br>
+    <div class="container text-center">
+      <fieldset class="form-group">
+        <input id="addOption" class="btn btn-secondary" type="button" value="+" /><input id="subOption" class="btn btn-secondary" type="button" value="-" />
+      </fieldset>
+    </div>
+    <br>
+    <div class="container text-center">
+      <fieldset class="form-group">
+        <input id="submit" class="btn btn-secondary" type="submit" value="Submit Poll" />
+      </fieldset>
+    </div>
+    <br>
+  </form>
+</body>
 </html>
