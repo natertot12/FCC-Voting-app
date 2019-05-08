@@ -1,2 +1,4 @@
 # FCC-Voting-app
-Freecodecamp challenge Voting App
+FreeCodeCamp.com challenge Voting App
+
+https://learn.freecodecamp.org/coding-interview-prep/take-home-projects/build-a-voting-app/
